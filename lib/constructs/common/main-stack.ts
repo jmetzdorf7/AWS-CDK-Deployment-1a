@@ -1,14 +1,12 @@
-import * as cdk from 'aws-cdk-lib';
-import { CustomConstruct } from 'lib/custom-constructs.ts';
-
-import { VpcConstruct } from '';
-import { TransitGatewayConstruct } from '';
-import { TgwAttachmentConstruct } from '';
-import { LoggingConstruct } from '';
-import { ApiGatewayConstruct } from '';
-import { IamConstruct } from '';
-import { S3Construct } from '';
-import { Ec2Construct } from '';
+import { CustomConstruct } from '../../custom-construct';
+import { VpcConstruct } from './vpc-construct';
+import { TransitGatewayConstruct } from './transit-gateway-construct';
+import { TgwAttachmentConstruct } from './tgw-attachment-construct';
+import { LoggingConstruct } from './logging-construct';
+import { ApiGatewayConstruct } from './api-gateway-construct';
+import { IamConstruct } from './iam-construct';
+import { S3Construct } from './s3-construct';
+import { Ec2Construct } from './ec2-construct';
 
 export interface MainStackProps extends cdk.StackProps {
   envName: string;

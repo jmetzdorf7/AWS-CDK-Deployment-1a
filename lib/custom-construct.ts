@@ -1,4 +1,4 @@
-import { Construct } from 'lib/constructs';
+import { Construct } from 'constructs';
 import * as cdk from 'aws-cdk-lib';
 // Example AWS CDK imports (uncomment as needed)
 // import * as s3 from 'aws-cdk-lib/aws-s3';

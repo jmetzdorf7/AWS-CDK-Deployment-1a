@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { CustomConstruct } from '../lib/custom-construct.ts';
-import { MainStack, MainStackProps } from '../lib/constructs/common/main-stack.ts';
+import { CustomConstruct } from '../lib/custom-construct';
+import { MainStack, MainStackProps } from '../lib/constructs/common/main-stack';
 
 const app = new cdk.App();
 
