@@ -1,0 +1,84 @@
+name: CDK — Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write   # required for OIDC
+  # optionally: deployments: write
+
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: 'us-east-1'  # override via repo variables or secrets
+
+concurrency:
+  group: cdk-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy stacks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Build (if applicable)
+        run: |
+          npm run build --if-present
+
+      # Configure AWS credentials — recommended using OIDC role assumption
+      - name: Configure AWS credentials (OIDC / role)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (access key) — fallback
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY && !secrets.AWS_ROLE_TO_ASSUME }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK CLI version
+        run: |
+          npx cdk --version
+
+      - name: CDK deploy (all stacks)
+        # Use --require-approval never for unattended deploys; remove or adjust for production if manual approvals required.
+        env:
+          # Optionally set which stack(s) to deploy. Leave blank to deploy all.
+          TARGET_STACKS: ${{ secrets.TARGET_STACKS || '' }}
+        run: |
+          if [ -n "$TARGET_STACKS" ]; then
+            echo "Deploying specified stacks: $TARGET_STACKS"
+            npx cdk deploy $TARGET_STACKS --require-approval never
+          else
+            echo "Deploying all stacks"
+            npx cdk deploy --all --require-approval never
+          fi
+
+      - name: Post-deploy outputs
+        # Show CloudFormation outputs produced by CDK
+        run: |
+          echo "Deployment completed. If your stacks publish outputs, they'll have been shown above."
