@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Install phase: show extracted directories"
+      - ls -la
+      - echo "Primary source dir: $CODEBUILD_SRC_DIR"
+      - env | grep CODEBUILD_SRC_DIR | sort
+  build:
+    commands:
+      - echo "Build phase — run builds in each repo area"
+      # The primary artifact is extracted into $CODEBUILD_SRC_DIR (root).
+      # Secondary artifacts are extracted into directories available via CODEBUILD_SRC_DIR_<ARTIFACT_NAME>
+      # Artifact names are normalized: non-alphanumeric -> underscore, uppercase.
+      - echo "Listing CODEBUILD_SRC_DIR_* variables"
+      - env | grep ^CODEBUILD_SRC_DIR_ || true
+      - echo "Assuming two repos 'service-a' and 'service-b' were provided as artifact names."
+      # Try to use the generated env variables if present, otherwise fallback to directory names
+      - SERVICE_A_DIR=${CODEBUILD_SRC_DIR_SERVICE_A:-service-a}
+      - SERVICE_B_DIR=${CODEBUILD_SRC_DIR_SERVICE_B:-service-b}
+      - echo "Service A dir: $SERVICE_A_DIR"
+      - echo "Service B dir: $SERVICE_B_DIR"
+      - echo "Build service-a"
+      - if [ -d "$SERVICE_A_DIR" ]; then (cd "$SERVICE_A_DIR" && npm ci && npm run build || true); else echo "Directory $SERVICE_A_DIR not found"; fi
+      - echo "Build service-b"
+      - if [ -d "$SERVICE_B_DIR" ]; then (cd "$SERVICE_B_DIR" && npm ci && npm run build || true); else echo "Directory $SERVICE_B_DIR not found"; fi
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
