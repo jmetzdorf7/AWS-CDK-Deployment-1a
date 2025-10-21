@@ -23,7 +23,7 @@ Notes:
 
 ## Mermaid flowchart
 
-```mermaid
+
 flowchart TD
   subgraph DevFlow[Developer Flow]
     Dev[Developer edits CDK app\n(in app or shared repo)]
