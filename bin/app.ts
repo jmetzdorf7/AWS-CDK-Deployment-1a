@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { CustomConstruct } from '../lib/custom-construct';
 import { MainStack, MainStackProps } from '../lib/constructs/common/main-stack';
+import * as cdk from 'aws-cdk-lib';
+import { TemplateBucketStack } from '../lib/template-bucket-stack';
 
 const app = new cdk.App();
 
@@ -30,3 +32,8 @@ const stackProps: MainStackProps = {
 
 // Deploy main stack
 new MainStack(app, stackProps.stackName, stackProps);
+
+// Template bucket stack
+new TemplateBucketStack(app, 'TemplateBucketStack', {
+  /* optional stack props, e.g. env: { account: '...', region: '...' } */
+});
