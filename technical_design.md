@@ -1,8 +1,5 @@
 # Technical Design Document  
 **Project:** AWS CDK Deployment  
-**Repository:** [jmetzdorf7/AWS-CDK-Deployment-1a](https://github.com/jmetzdorf7/AWS-CDK-Deployment-1a)  
-**Date:** 2025-10-15  
-**Author:** jmetzdorf7  
 
 ---
 
@@ -20,12 +17,14 @@
 10. Cost Considerations  
 11. Risks & Mitigations  
 12. Future Enhancements  
+13. Document Change Log  
+14. Repository Snapshot
 
 ---
 
 ## 1. Overview
 
-This document outlines the technical design for the AWS infrastructure deployed using AWS CDK (Cloud Development Kit). The goal is to provide a scalable, secure, and maintainable cloud environment for the target application/workloads.
+This document outlines the technical design for the AWS infrastructure deployed using AWS CDK (Cloud Development Kit). The goal is to provide a scalable, secure, and maintainable cloud environment[...]
 
 ---
 
@@ -74,11 +73,12 @@ _Replace with your actual architecture if different._
 
 ## 5. Infrastructure as Code (IaC) Design
 
-- **Language:** TypeScript/Python/JavaScript (specify based on your CDK implementation)
+- **Language:** Specify the CDK language used in this repository (update if different).  
+  - Note: Ensure the document matches the repository's actual CDK language (TypeScript, Python, etc.).
 - **Project Structure:**  
-    - `/lib`: CDK stack definitions
-    - `/bin`: CDK entrypoint
-    - `/cdk.json`: CDK configuration
+    - `/lib`: CDK stack definitions  
+    - `/bin`: CDK entrypoint  
+    - `/cdk.json`: CDK configuration  
     - `/test`: Automated tests for stacks
 - **Resource Naming Conventions:**  
     - All resources are prefixed with the project name and environment (e.g., `myproj-dev-...`)
@@ -86,6 +86,10 @@ _Replace with your actual architecture if different._
     - Separate stacks for dev, staging, and prod environments
 - **Parameters and Secrets:**  
     - Managed via AWS Systems Manager Parameter Store or AWS Secrets Manager
+- **Configuration & Context:**  
+    - Use cdk.context.json or environment-specific parameter files to keep environment-specific values out of code.
+- **Testing:**  
+    - Include unit tests for constructs and integration tests for synthesized templates where possible.
 
 ---
 
@@ -101,6 +105,8 @@ _Replace with your actual architecture if different._
    Leveraging CloudFormation automatic rollback on failure
 5. **CI/CD Integration:**  
    Optionally integrated with GitHub Actions for automated deployments
+   - Ensure least-privilege deploy IAM role for CI/CD runners
+   - Store secrets and credentials in Actions secrets, Secrets Manager, or an external secrets manager
 
 ---
 
@@ -114,6 +120,10 @@ _Replace with your actual architecture if different._
   No hardcoded secrets; use of AWS Secrets Manager or Parameter Store.
 - **Encryption:**  
   S3 buckets and DynamoDB tables encrypted at rest.
+- **Logging & Auditing:**  
+  Ensure CloudTrail is enabled for account-level auditing and cross-account access is monitored.
+- **Dependency Management:**  
+  Regularly scan dependencies (npm/PyPI) for vulnerabilities and apply updates.
 
 ---
 
@@ -125,6 +135,10 @@ _Replace with your actual architecture if different._
   Configure CloudWatch alarms for error rates, latency, and resource utilization.
 - **Dashboards:**  
   Optional: Custom CloudWatch dashboards for operational visibility.
+- **Tracing:**  
+  Consider enabling AWS X-Ray for distributed tracing where appropriate.
+- **Log Retention & Export:**  
+  Define retention policies and optionally export to S3 for long-term storage or to a log analytics platform.
 
 ---
 
@@ -138,6 +152,8 @@ _Replace with your actual architecture if different._
   AWS managed, inherently scalable and highly available.
 - **Multi-AZ Deployment:**  
   All resources that support it are deployed in multiple availability zones.
+- **Testing for Scaling:**  
+  Perform load testing and validate throttling/backpressure behaviors.
 
 ---
 
@@ -149,6 +165,8 @@ _Replace with your actual architecture if different._
   Automated stack deletion for unused environments (dev/test).
 - **Budget Alerts:**  
   Optional: AWS Budgets and cost alerts configured.
+- **Tagging:**  
+  Enforce tags for cost-center and environment for easier cost tracking.
 
 ---
 
@@ -169,10 +187,6 @@ _Replace with your actual architecture if different._
 - Introduce blue/green deployment strategies
 - Expand monitoring with third-party tools
 - Implement canary releases and A/B testing
+- Add automated security scans (IaC linter, policy-as-code, dependency scanning)
 
 ---
-
-## Appendix
-
-- [AWS CDK Docs](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
-- [CloudFormation Best Practices](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html)
