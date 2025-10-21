@@ -1,3 +1,4 @@
+# Updated CDK — Deploy workflow with CloudFormation template upload to S3
 name: CDK — Deploy
 
 on:
@@ -8,7 +9,6 @@ on:
 permissions:
   contents: read
   id-token: write   # required for OIDC
-  # optionally: deployments: write
 
 env:
   NODE_VERSION: '18'
@@ -44,7 +44,7 @@ jobs:
         run: |
           npm run build --if-present
 
-      # Configure AWS credentials — recommended using OIDC role assumption
+      # Configure AWS credentials (OIDC / role)
       - name: Configure AWS credentials (OIDC / role)
         if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
         uses: aws-actions/configure-aws-credentials@v2
@@ -64,10 +64,24 @@ jobs:
         run: |
           npx cdk --version
 
-      - name: CDK deploy (all stacks)
-        # Use --require-approval never for unattended deploys; remove or adjust for production if manual approvals required.
+      - name: CDK synth (all)
+        run: |
+          npx cdk synth --all
+
+      - name: Upload CloudFormation templates to S3
         env:
-          # Optionally set which stack(s) to deploy. Leave blank to deploy all.
+          BUCKET: ${{ secrets.CF_TEMPLATES_BUCKET }}   # provide the bucket name via repo secret
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "${BUCKET:-}" ]; then
+            echo "CF_TEMPLATES_BUCKET secret not configured — skipping template upload"
+            exit 0
+          fi
+          chmod +x scripts/upload-templates.sh || true
+          ./scripts/upload-templates.sh
+
+      - name: CDK deploy (all stacks)
+        env:
           TARGET_STACKS: ${{ secrets.TARGET_STACKS || '' }}
         run: |
           if [ -n "$TARGET_STACKS" ]; then
@@ -79,6 +93,5 @@ jobs:
           fi
 
       - name: Post-deploy outputs
-        # Show CloudFormation outputs produced by CDK
         run: |
           echo "Deployment completed. If your stacks publish outputs, they'll have been shown above."
