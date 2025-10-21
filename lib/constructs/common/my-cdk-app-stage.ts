@@ -13,14 +13,14 @@ export class MyCdkAppStage extends Stage {
 
     // Build main stack props explicitly to avoid passing StageProps fields accidentally.
     const mainStackProps: Partial<MainStackProps> = {
-      ...(props as Partial<MainStackProps>), // allow overriding other MainStackProps if provided
+      ...(props as Partial<MainStackProps>), // allow overriding known MainStackProps if provided
       envName,
-      env: props?.env, // stage env -> stack env (account/region). Keep this explicit.
-      description: `Main infrastructure stack for ${envName} environment`,
+      env: props?.env, // propagate account/region explicitly
+      description: (props as Partial<MainStackProps>)?.description ?? `Main infrastructure stack for ${envName} environment`,
     };
 
     // Only set a fixed stackName if it's explicitly provided in props; otherwise let CDK generate it.
-    if ((props as any)?.stackName) {
+    if ((props as Partial<MainStackProps>)?.stackName) {
       (mainStackProps as any).stackName = (props as any).stackName;
     }
 
